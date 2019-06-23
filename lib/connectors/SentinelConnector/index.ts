@@ -81,6 +81,7 @@ export default class SentinelConnector extends AbstractConnector {
     this.lastError = undefined;
 
     if (!this.sentinelIterator.length && this.options.floatingSentinels) {
+      // In case we start without prior initial sentinels.
       this.connectToFloat(callback, eventEmitter);
     } else {
       this.connectToNext(callback, eventEmitter);
