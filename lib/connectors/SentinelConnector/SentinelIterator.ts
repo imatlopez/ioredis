@@ -5,17 +5,21 @@ function isSentinelEql (a: Partial<ISentinelAddress>, b: Partial<ISentinelAddres
     ((a.port || 26379) === (b.port || 26379))
 }
 
-export default class SentinelIterator {
+export default class SentinelIterator implements Iterator<Partial<ISentinelAddress>> {
   private cursor: number = 0
 
   constructor (private sentinels: Partial<ISentinelAddress>[]) {}
 
-  hasNext (): boolean {
-    return this.cursor < this.sentinels.length
+  get length () {
+    return this.sentinels.length;
   }
 
-  next (): Partial<ISentinelAddress> | null {
-    return this.hasNext() ? this.sentinels[this.cursor++] : null
+  get done (): boolean {
+    return this.cursor >= this.sentinels.length
+  }
+
+  next () {
+    return { done: this.done, value: this.done ? undefined : this.sentinels[this.cursor++] }
   }
 
   reset (moveCurrentEndpointToFirst: boolean): void {
