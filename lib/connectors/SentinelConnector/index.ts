@@ -80,7 +80,7 @@ export default class SentinelConnector extends AbstractConnector {
     this.retryAttempts = 0
     this.lastError = undefined;
 
-    if (!this.sentinelIterator.length && this.options.floatingSentinels) {
+    if (!this.options.sentinels.length && this.options.floatingSentinels) {
       // In case we start without prior initial sentinels.
       this.connectToFloat(callback, eventEmitter);
     } else {
@@ -104,7 +104,9 @@ export default class SentinelConnector extends AbstractConnector {
   }
 
   private connectToNext(callback: NodeCallback<NetStream>, eventEmitter: ErrorEmitter) {
-    if (this.sentinelIterator.done) {
+    const endpoint = this.sentinelIterator.next()
+
+    if (endpoint.done) {
       this.sentinelIterator.reset(false)
 
       const retryDelay = typeof this.options.sentinelRetryStrategy === 'function'
@@ -137,8 +139,7 @@ export default class SentinelConnector extends AbstractConnector {
       return
     }
 
-    const { value: endpoint } = this.sentinelIterator.next()
-    this.resolve(endpoint, (err, resolved) => {
+    this.resolve(endpoint.value, (err, resolved) => {
       if (!this.connecting) {
         callback(new Error(CONNECTION_CLOSED_ERROR_MSG))
         return
@@ -154,7 +155,7 @@ export default class SentinelConnector extends AbstractConnector {
         this.sentinelIterator.reset(true)
         callback(null, this.stream)
       } else {
-        const endpointAddress = endpoint.host + ':' + endpoint.port
+        const endpointAddress = endpoint.value.host + ':' + endpoint.value.port
         const errorMsg = err
           ? 'failed to connect to sentinel ' + endpointAddress + ' because ' + err.message
           : 'connected to sentinel ' + endpointAddress + ' successfully, but got an invalid reply: ' + resolved
@@ -247,7 +248,7 @@ export default class SentinelConnector extends AbstractConnector {
     return this.options.natMap[`${item.host}:${item.port}`] || item
   }
 
-  private resolve (endpoint, callback: NodeCallback<ITcpConnectionOptions>): void {
+  private resolve (endpoint: Partial<ISentinelAddress>, callback: NodeCallback<ITcpConnectionOptions>): void {
     var client = new Redis({
       port: endpoint.port || 26379,
       host: endpoint.host,

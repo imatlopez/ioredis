@@ -10,16 +10,9 @@ export default class SentinelIterator implements Iterator<Partial<ISentinelAddre
 
   constructor (private sentinels: Partial<ISentinelAddress>[]) {}
 
-  get length () {
-    return this.sentinels.length;
-  }
-
-  get done (): boolean {
-    return this.cursor >= this.sentinels.length
-  }
-
   next () {
-    return { done: this.done, value: this.done ? undefined : this.sentinels[this.cursor++] }
+    const done = this.cursor >= this.sentinels.length;
+    return { done: done, value: done ? undefined : this.sentinels[this.cursor++] }
   }
 
   reset (moveCurrentEndpointToFirst: boolean): void {
