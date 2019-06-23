@@ -17,8 +17,7 @@ export default class SentinelIterator implements Iterator<Partial<ISentinelAddre
 
   reset (moveCurrentEndpointToFirst: boolean): void {
     if (moveCurrentEndpointToFirst && this.sentinels.length > 1 && this.cursor !== 1) {
-      const remains = this.sentinels.slice(this.cursor - 1)
-      this.sentinels = remains.concat(this.sentinels.slice(0, this.cursor - 1))
+      this.sentinels.push(...this.sentinels.splice(0, this.cursor - 1));
     }
     this.cursor = 0
   }
